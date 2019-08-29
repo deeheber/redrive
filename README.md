@@ -11,6 +11,8 @@ The core setup contains the following:
 
 *Note*: You'll likely have multiple SQS queues/Lambdas connected to the core SNS topic entry point in an enterprise prod environment...but I'm just showing one pipeline in this demo for simplicity purposes.
 
+![visualization](https://user-images.githubusercontent.com/12616554/63967578-9526fc80-ca52-11e9-898b-34d85ab5babb.png)
+
 ### Redrive
 In the event that an error is thrown, the Lambda will retry the code three times and then send it to the Dead Letter Queue (DLQ).
 
