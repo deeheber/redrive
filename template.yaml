@@ -12,6 +12,9 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub ${AWS::StackName}-Queue
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 3
   Function:
     Type: AWS::Serverless::Function
     Properties:
@@ -49,6 +52,38 @@ Resources:
                 aws:SourceArn: !Ref Topic
       Queues:
         - !Ref Queue
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AWS::StackName}-DeadLetterQueue
+      MessageRetentionPeriod: 1209600
+  RedriveFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-RedriveFunction
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: RedriveFunction
+      CodeUri: src/RedriveFunction
+      Handler: index.handler
+      Runtime: nodejs10.x
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt DeadLetterQueue.QueueName
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt Queue.QueueName
+      Environment:
+        Variables:
+          QUEUE_NAME: !GetAtt DeadLetterQueue.QueueName
+          QUEUE_ARN: !GetAtt DeadLetterQueue.Arn
+          QUEUE_URL: !Ref DeadLetterQueue
+          QUEUE_NAME_2: !GetAtt Queue.QueueName
+          QUEUE_ARN_2: !GetAtt Queue.Arn
+          QUEUE_URL_2: !Ref Queue
 Parameters:
   StackTagName:
     Type: String
