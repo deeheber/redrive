@@ -1,14 +1,17 @@
-# Stackery Blank SAM Template
+# Redrive demo
+This is an example stack to demo how to setup a redrive policy should something fail as it is going through the pipeline.
 
-This is a sample template for a serverless AWS Lambda application.
+## Architecture
+Setup with the [event fork pipeline](https://aws.amazon.com/blogs/compute/enriching-event-driven-architectures-with-aws-event-fork-pipelines/) in mind.
 
-Here is an overview of the files:
+The core setup contains the following:
+  - SNS topic
+  - SQS queue
+  - Lambda function
 
-```text
-.
-├── deployHooks/                       <-- Directory for storing deployment hooks
-├── .gitignore                         <-- Gitignore for Stackery
-├── .stackery-config.yaml              <-- Default CLI parameters for root directory
-├── README.md                          <-- This README file
-└── template.yaml                      <-- SAM infrastructure-as-code template
-```
+*Note*: You'll likely have multiple SQS queues/Lambdas connected to the core SNS topic entry point in an enterprise prod environment...but I'm just showing one pipeline in this demo for simplicity purposes.
+
+### Redrive
+In the event that an error is thrown, the Lambda will retry the code three times and then send it to the Dead Letter Queue (DLQ).
+
+Once all errors have been cleaned up, you can then run the redrive function manually from the AWS Lambda console to feed the previously failed messages from thee DLQ back into the Queue to retry the job.
