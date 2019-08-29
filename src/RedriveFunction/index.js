@@ -5,80 +5,49 @@ exports.handler = async event => {
   // Log the event argument for debugging and for use in local development.
   console.log(JSON.stringify(event, undefined, 2));
 
-  const receiveParams = {
-    QueueUrl: process.env.DLQ_URL,
-    MaxNumberOfMessages: 10
-  };
-
-  let DLQMessages;
-
-  try {
-    DLQMessages = await sqs.receiveMessage(receiveParams).promise();
-    console.log('MESSAGE RECEIVE SUCCESS');
-    console.log(JSON.stringify(DLQMessages, undefined, 2));
-  } catch (err) {
-    console.log('ERROR RECEIVING MESSAGES THE FIRST TIME');
-    console.log(err.message);
-    console.log(JSON.stringify(err, null, 2));
-    throw new Error('Error on initial message receive');
-  }
-
-  do {
-    if (!DLQMessages.Messages) {
-      console.log(`NO MESSAGES FOUND IN ${process.env.DLQ_URL}`);
-      // Exit the function early due to no messages in the queue
-      return {
-        statusCode: 200,
-        headers: {},
-        body: `No messages in ${event.inboundQueue}`
-      };
-    }
-
-    console.log(`RECEIVED ${DLQMessages.Messages.length} MESSAGES`);
-
-    DLQMessages.Messages.forEach(async message => {
-      // Send message
-      const sendParams = {
-        MessageBody: message.Body,
-        QueueUrl: process.env.QUEUE_URL
-      };
-
-      console.log(`SENDING: ${JSON.stringify(sendParams, null, 2)}`);
-
-      try {
-        await sqs.sendMessage(sendParams).promise();
-        console.log('MESSAGE SEND SUCCESS');
-      } catch (err) {
-        console.log('ERROR SENDING MESSAGE');
-        console.log(err.message);
-        console.log(JSON.stringify(err, null, 2));
-      }
-
-      // Delete message
-      const deleteParams = {
-        QueueUrl: process.env.DLQ_URL,
-        ReceiptHandle: message.ReceiptHandle
-      };
-
-      console.log(`DELETING: ${JSON.stringify(deleteParams, null, 2)}`);
-
-      try {
-        await sqs.deleteMessage(deleteParams).promise();
-        console.log('MESSAGE DELETE SUCCESS');
-      } catch (err) {
-        console.log('ERROR DELETING MESSAGE');
-        console.log(err.message);
-        console.log(JSON.stringify(err, null, 2));
-      }
-    });
-
-    // See if there are any more messages in the DLQ
+  while (true) {
     try {
-      DLQMessages = await sqs.receiveMessage(receiveParams).promise();
+      // Use long polling to avoid empty message reponses
+      const receiveParams = {
+        QueueUrl: process.env.DLQ_URL,
+        MaxNumberOfMessages: 10,
+        WaitTimeSeconds: 1
+      };
+
+      const DLQMessages = await sqs.receiveMessage(receiveParams).promise();
+
+      if (!DLQMessages.Messages || DLQMessages.Messages.length === 0) {
+        console.log(`NO MESSAGES FOUND IN ${process.env.DLQ_URL}`);
+        break;
+      }
+
+      console.log(`RECEIVED ${DLQMessages.Messages.length} MESSAGES`);
+
+      for (const message of DLQMessages.Messages) {
+        // Send message to original queue
+        const outboundMessage = {
+          MessageBody: message.Body,
+          QueueUrl: process.env.QUEUE_URL
+        };
+
+        console.log(`SENDING: ${JSON.stringify(outboundMessage, null, 2)}`);
+        await sqs.sendMessage(outboundMessage).promise();
+        console.log('SEND MESSAGE SUCCEEDED');
+
+        // Delete message from DLQ
+        const deleteParams = {
+          QueueUrl: process.env.DLQ_URL,
+          ReceiptHandle: message.ReceiptHandle
+        };
+
+        console.log(`DELETING: ${JSON.stringify(deleteParams, null, 2)}`);
+        await sqs.deleteMessage(deleteParams).promise();
+        console.log('DELETE MESSAGE SUCCEEDED');
+      }
     } catch (err) {
-      console.log('ERROR RECEIVING MESSAGES');
-      console.log(err.message);
+      console.log(`AN ERROR OCCURED: ${err.message}`);
       console.log(JSON.stringify(err, null, 2));
+      throw err;
     }
-  } while (DLQMessages.Messages);
+  }
 };
