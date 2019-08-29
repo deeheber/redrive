@@ -13,7 +13,7 @@ The core setup contains the following:
 
 ![visualization](https://user-images.githubusercontent.com/12616554/63967578-9526fc80-ca52-11e9-898b-34d85ab5babb.png)
 
-### Redrive
+## Redrive
 In the event that an error is thrown, the Lambda will retry the code three times and then send it to the Dead Letter Queue (DLQ).
 
 Once all errors have been cleaned up, you can then run the redrive function manually from the AWS Lambda console to feed the previously failed messages from thee DLQ back into the Queue to retry the job.
