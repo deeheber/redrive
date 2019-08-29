@@ -72,18 +72,14 @@ Resources:
       Tracing: Active
       Policies:
         - AWSXrayWriteOnlyAccess
-        - SQSSendMessagePolicy:
+        - SQSPollerPolicy:
             QueueName: !GetAtt DeadLetterQueue.QueueName
         - SQSSendMessagePolicy:
             QueueName: !GetAtt Queue.QueueName
       Environment:
         Variables:
-          QUEUE_NAME: !GetAtt DeadLetterQueue.QueueName
-          QUEUE_ARN: !GetAtt DeadLetterQueue.Arn
-          QUEUE_URL: !Ref DeadLetterQueue
-          QUEUE_NAME_2: !GetAtt Queue.QueueName
-          QUEUE_ARN_2: !GetAtt Queue.Arn
-          QUEUE_URL_2: !Ref Queue
+          DLQ_URL: !Ref DeadLetterQueue
+          QUEUE_URL: !Ref Queue
 Parameters:
   StackTagName:
     Type: String
