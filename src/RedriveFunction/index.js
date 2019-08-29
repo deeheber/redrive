@@ -14,10 +14,13 @@ exports.handler = async event => {
         WaitTimeSeconds: 1
       };
 
+      // Get messages from the DLQ
+      // Continue looping until no more messages are left
       const DLQMessages = await sqs.receiveMessage(receiveParams).promise();
 
       if (!DLQMessages.Messages || DLQMessages.Messages.length === 0) {
         console.log(`NO MESSAGES FOUND IN ${process.env.DLQ_URL}`);
+        // Exit the loop since there aren't any messages left
         break;
       }
 
