@@ -1,6 +1,8 @@
 # Redrive demo
 This is an example stack to demo how to setup a redrive policy should something fail as it is going through the pipeline.
 
+Deploy this stack to your AWS account using the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started.html)
+
 ## Architecture
 Setup with the [event fork pipeline](https://aws.amazon.com/blogs/compute/enriching-event-driven-architectures-with-aws-event-fork-pipelines/) in mind.
 
