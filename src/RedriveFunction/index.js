@@ -1,5 +1,6 @@
-const aws = require('aws-sdk');
-const sqs = new aws.SQS();
+const { SQSClient, ReceiveMessageCommand, SendMessageCommand, DeleteMessageCommand } = require("@aws-sdk/client-sqs");
+// TODO: replace this with your region
+const client = new SQSClient({ region: 'us-west-2' });
 
 exports.handler = async event => {
   // Log the event argument for debugging and for use in local development.
@@ -16,7 +17,7 @@ exports.handler = async event => {
 
       // Get messages from the DLQ
       // Continue looping until no more messages are left
-      const DLQMessages = await sqs.receiveMessage(receiveParams).promise();
+      const DLQMessages = await client.send(new ReceiveMessageCommand(receiveParams));
 
       if (!DLQMessages.Messages || DLQMessages.Messages.length === 0) {
         console.log(`NO MESSAGES FOUND IN ${process.env.DLQ_URL}`);
@@ -34,7 +35,7 @@ exports.handler = async event => {
         };
 
         console.log(`SENDING: ${JSON.stringify(outboundMessage, null, 2)}`);
-        await sqs.sendMessage(outboundMessage).promise();
+        await client.send(new SendMessageCommand(outboundMessage));
         console.log('SEND MESSAGE SUCCEEDED');
 
         // Delete message from DLQ
@@ -44,7 +45,7 @@ exports.handler = async event => {
         };
 
         console.log(`DELETING: ${JSON.stringify(deleteParams, null, 2)}`);
-        await sqs.deleteMessage(deleteParams).promise();
+        await client.send(new DeleteMessageCommand(deleteParams));
         console.log('DELETE MESSAGE SUCCEEDED');
       }
     } catch (err) {
