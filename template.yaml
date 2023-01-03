@@ -24,7 +24,9 @@ Resources:
         - ResourceName: Function
       CodeUri: src/Function
       Handler: index.handler
-      Runtime: nodejs14.x
+      Architectures:
+        - arm64
+      Runtime: nodejs18.x
       MemorySize: 3008
       Timeout: 30
       Tracing: Active
@@ -66,7 +68,9 @@ Resources:
         - ResourceName: RedriveFunction
       CodeUri: src/RedriveFunction
       Handler: index.handler
-      Runtime: nodejs14.x
+      Architectures:
+        - arm64
+      Runtime: nodejs18.x
       MemorySize: 3008
       Timeout: 30
       Tracing: Active

@@ -1,7 +1,7 @@
 {
   "name": "redrivefunction",
   "version": "1.0.0",
-  "devDependencies": {
-    "aws-sdk": "~2"
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.241.0"
   }
 }
