@@ -1,6 +1,8 @@
 # Redrive demo
 This is an example stack to demo how to setup a redrive policy should something fail as it is going through the pipeline.
 
+**Update:** AWS added a button in the SQS DLQ console to redrive the messages back into the source queue. This is a much better solution than the redrive Lambda function I created in this stack, but I'll keep this up for reference. See the announcement blog post [here](https://aws.amazon.com/blogs/compute/introducing-amazon-simple-queue-service-dead-letter-queue-redrive-to-source-queues/). **This repo will be in archive-read only mode and will not be receiving future updates/maintence for this reason.**
+
 ## Architecture
 Setup with the [event fork pipeline](https://aws.amazon.com/blogs/compute/enriching-event-driven-architectures-with-aws-event-fork-pipelines/) in mind.
 
@@ -19,8 +21,6 @@ The core setup contains the following:
 In the event that an error is thrown, the Lambda will retry the code three times and then send it to the Dead Letter Queue (DLQ).
 
 Once all errors have been cleaned up, you can then run the redrive function manually from the AWS Lambda console via the "test" button to feed the previously failed messages from thee DLQ back into the Queue to retry the job.
-
-**Update:** AWS has added a button in the SQS DLQ console to redrive the messages back into the source queue. This is a much better solution than the redrive Lambda function I created in this stack, but I'll keep this up for reference. See the announcement blog post [here](https://aws.amazon.com/blogs/compute/introducing-amazon-simple-queue-service-dead-letter-queue-redrive-to-source-queues/). This repo will be in archive-read only mode and will not be receiving future updates/maintence for this reason.
 
 ## Deploy Directions
 Deploy this stack to your AWS account using the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-getting-started.html)
