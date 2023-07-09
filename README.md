@@ -1,7 +1,12 @@
 # Redrive demo
-This is an example stack to demo how to setup a redrive policy should something fail as it is going through the pipeline.
+This is an example stack to demo how to setup a redrive policy should something fail as it is going through the pipeline. Companion [blog post](https://www.danielleheberling.xyz/blog/dlq-messages/).
 
-**Update:** AWS added a button in the SQS DLQ console to redrive the messages back into the source queue. This is a much better solution than the redrive Lambda function I created in this stack, but I'll keep this up for reference. See the announcement blog post [here](https://aws.amazon.com/blogs/compute/introducing-amazon-simple-queue-service-dead-letter-queue-redrive-to-source-queues/). **This repo will be in archive-read only mode and will not be receiving future updates/maintence for this reason.**
+**Update:** AWS added a button in the SQS DLQ console to redrive the messages back into the source queue (for non FIFO). See the announcement blog post [here](https://aws.amazon.com/blogs/compute/introducing-amazon-simple-queue-service-dead-letter-queue-redrive-to-source-queues/). 
+
+**Update to the Update:** AWS released a new set of APIs for DLQ redrives. Read about it [here](https://aws.amazon.com/blogs/aws/a-new-set-of-apis-for-amazon-sqs-dead-letter-queue-redrive/).
+
+These are much better solutions than the redrive Lambda function I created in this stack, but I'll keep this up for reference.
+**This repo will be in archive-read only mode and will not be receiving future updates/maintence for this reason.**
 
 ## Architecture
 Setup with the [event fork pipeline](https://aws.amazon.com/blogs/compute/enriching-event-driven-architectures-with-aws-event-fork-pipelines/) in mind.
